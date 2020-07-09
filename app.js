@@ -1,4 +1,7 @@
 // this is where i am going to be writing my inquirer functions that will prompt the user for questions in the cli and the information will then be stored within the database.
+
+//how can i use inquirer to insert data into mysql?
+
 const inquirer = require("inquirer");
 const mysql = require("mysql");
 
