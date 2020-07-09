@@ -29,7 +29,7 @@ connection.connect(function(err) {
         name: "start",
         type: "list",
         message: "What do you want to do?",
-        choices: ["Add information", "View database content","Update employee roles"]
+        choices: ["add information", "view database content","update employee roles", "delete data"]
         }).then (response => {
     for(i=0;i<choices.length;i++){
         if(response.choices === [0]){
@@ -38,12 +38,13 @@ connection.connect(function(err) {
           viewDatabase();
         } else if (response.choices === [2]){
             employeeRole();
+        } else if (response.choices === [3]){
+            deleteData();
         }
     };
 
   });
   };
-  begin();
   
   function addInfo(){
     inquirer.prompt
@@ -77,13 +78,42 @@ connection.connect(function(err) {
 
         }
     ).then(response => {
-
+        for(i=0;i<choices.length;i++){
+            if(response.choices === [0]){
+                //insert code to allow user to view the department data
+            } else if (response.choices === [1]){
+                //insert code to allow user to view role data
+            } else if (response.choices === [2]){
+                //insert code to allow user to view employee data
+            }
+        }
     })
   };
 
   function employeeRole(){
     // how to show a list of employees to choose from and update
   }
+
+  function deleteData(){
+      inquirer.prompt
+    (
+        {
+            type:"list",
+            message:"what would you like to delete?",
+            choices:["department","role","employee"]
+        }
+    ).then(response => {
+        for(i=0;i<choices.length;i++){
+            if(response.choices === [0]){
+                //insert code to delete a specific department
+            } else if (response.choices === [1]){
+                //insert code to delete a specific role
+            } else if (response.choices === [2]){
+                //insert code to delete a specific employee
+            }
+        }
+    });
+  };
 
   function department(){
     inquirer.prompt
@@ -115,3 +145,5 @@ connection.connect(function(err) {
         }
     )
   };
+
+  begin();
