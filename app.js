@@ -29,13 +29,15 @@ connection.connect(function(err) {
         name: "start",
         type: "list",
         message: "What do you want to do?",
-        choices: ["Add information", "View database content"]
+        choices: ["Add information", "View database content","Update employee roles"]
         }).then (response => {
     for(i=0;i<choices.length;i++){
         if(response.choices === [0]){
           addInfo();
         } else if (response.choices === [1]) {
           viewDatabase();
+        } else if (response.choices === [2]){
+            employeeRole();
         }
     };
 
@@ -78,6 +80,10 @@ connection.connect(function(err) {
 
     })
   };
+
+  function employeeRole(){
+    // how to show a list of employees to choose from and update
+  }
 
   function department(){
     inquirer.prompt
