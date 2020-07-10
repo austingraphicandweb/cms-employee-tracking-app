@@ -91,28 +91,67 @@ connection.connect(function(err) {
 
   //is this function going to get its logic from what is inside of the database?
   function employeeRole(){
-    // how to show a list of employees to choose from and update
+    // how to show a list of employees to choose from and update. id, first name, last name, role_id, manager_id
+
+    inquirer.prompt(ƒ
+        [
+            {
+                type:"input",
+                message:"what is your first name",
+                name:"first_name"
+            },
+            {
+                type:"input",
+                message:"what is your last name",
+                name:"last_name"
+            },
+            {
+                type:"list",
+                message:"what is your manager id",
+                choices: mappedRes,
+                name: "managerId"
+            }
+            //i think that role_id is what is auto incrimented inside of mysql
+        ],
+    ).then(response => {
+        // returning the department name from the department table through the usage of res.find
+         const foundObj = res.find(department => {
+            return response.department === department.name
+         })  
+        //  console.log(foundObj);          
+         connection.query ("INSERT INTO role SET ?", 
+        {
+            title: response.role,
+            salary: response.salary,
+            department_id: foundObj.id
+        },
+        function (err,res){
+            if (err) throw err;
+            console.log(res.affectedRows + " product inserted!\n");
+        })
+    })
+
   }
 
-  function deleteData(){
-      inquirer.prompt
-    (
-        {
-            type:"list",
-            message:"what would you like to delete?",
-            choices:["department","role","employee"],
-            name:"delete"
-        }
-    ).then(response => {
-            if(response.delete === [0]){
-                //insert code to delete a specific department
-            } else if (response.delete === [1]){
-                //insert code to delete a specific role
-            } else if (response.delete === [2]){
-                //insert code to delete a specific employee
-            }
-    });
-  };
+//   function deleteData(){
+//       inquirer.prompt
+//     (
+//         {
+//             type:"list",
+//             message:"what would you like to delete?",
+//             choices:["department","role","employee"],
+//             name:"delete"
+//         }
+//     ).then(response => {
+//             if(response.delete === [0]){
+//                 //insert code to delete a specific department
+//             } else if (response.delete === [1]){
+//                 //insert code to delete a specific role
+//             } else if (response.delete === [2]){
+//                 //insert code to delete a specific employee
+//             }
+//     });
+//   };
 
   function department(){
     inquirer.prompt
@@ -123,6 +162,7 @@ connection.connect(function(err) {
             name:"department"
         }
     ).then(response => {
+        // here is where i am connecting to the department table so that i can inject a value into it 
         connection.query ("INSERT INTO department SET ?", 
         {
             name: response.department
@@ -135,12 +175,14 @@ connection.connect(function(err) {
   };
 
   function role(){
+      // right here is where the department table is being chosen so that an action can take place
     connection.query("SELECT * FROM department", function(err, res) {
         if (err) throw err;
         // Log all results of the SELECT statement
-        console.log(res);
+        // console.log(res);
+        // this is what is sued to look through the department names in the department table
         const mappedRes = res.map(department => department.name)
-        console.log(mappedRes);
+        // console.log(mappedRes);
         inquirer.prompt(
             [
                 {
@@ -161,6 +203,7 @@ connection.connect(function(err) {
                 }
             ],
         ).then(response => {
+            // returning the department name from the department table through the usage of res.find
              const foundObj = res.find(department => {
                 return response.department === department.name
              })  

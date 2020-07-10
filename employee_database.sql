@@ -21,8 +21,11 @@ last_name VARCHAR(30),
 role_id INT,
 manager_id INT
 );
-
-
-
+USE employee_tracker;
+SELECT * FROM employee_tracker.department;
+INSERT INTO department (name)
+VALUES ("marketing");
+INSERT INTO department (name)
+VALUES ("hr");
 
 
