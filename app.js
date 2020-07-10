@@ -34,18 +34,16 @@ connection.connect(function(err) {
         message: "What do you want to do?",
         choices: ["add information", "view database content","update employee roles", "delete data"]
         }).then (response => {
-    for(i=0;i<choices.length;i++){
-        if(response.choices === [0]){
+            console.log(response);
+        if(response.start === "add information"){
           addInfo();
-        } else if (response.choices === [1]) {
+        } else if (response.start === "view database content") {
           viewDatabase();
-        } else if (response.choices === [2]){
+        } else if (response.start === "update employee roles"){
             employeeRole();
-        } else if (response.choices === [3]){
+        } else if (response.start === "delete data"){
             deleteData();
         }
-    };
-
   });
   };
   
@@ -59,11 +57,11 @@ connection.connect(function(err) {
             name:"add"
         }
     ).then(response => {
-        if (response.choices === [0]){
+        if (response.add === "department"){
             department();
-        } else if (response.choices === [1]){
+        } else if (response.add === "role"){
             role();
-        } else if (response.choices === [2]){
+        } else if (response.add === "employee"){
             employee();
         }
     })
@@ -77,22 +75,21 @@ connection.connect(function(err) {
             type:"list",
             message:"What would you like to view in the database",
             choices:["department","role","employee"],
-            name:"add"
+            name:"database"
 
         }
     ).then(response => {
-        for(i=0;i<choices.length;i++){
-            if(response.choices === [0]){
+            if(response.database === "department"){
                 //insert code to allow user to view the department data
-            } else if (response.choices === [1]){
+            } else if (response.database === "role"){
                 //insert code to allow user to view role data
-            } else if (response.choices === [2]){
+            } else if (response.database === "employee"){
                 //insert code to allow user to view employee data
             }
-        }
     })
   };
 
+  //is this function going to get its logic from what is inside of the database?
   function employeeRole(){
     // how to show a list of employees to choose from and update
   }
@@ -103,18 +100,17 @@ connection.connect(function(err) {
         {
             type:"list",
             message:"what would you like to delete?",
-            choices:["department","role","employee"]
+            choices:["department","role","employee"],
+            name:"delete"
         }
     ).then(response => {
-        for(i=0;i<choices.length;i++){
-            if(response.choices === [0]){
+            if(response.delete === [0]){
                 //insert code to delete a specific department
-            } else if (response.choices === [1]){
+            } else if (response.delete === [1]){
                 //insert code to delete a specific role
-            } else if (response.choices === [2]){
+            } else if (response.delete === [2]){
                 //insert code to delete a specific employee
             }
-        }
     });
   };
 
@@ -126,17 +122,61 @@ connection.connect(function(err) {
             message:"department",
             name:"department"
         }
-    )
+    ).then(response => {
+        connection.query ("INSERT INTO department SET ?", 
+        {
+            name: response.department
+        },
+        function (err,res){
+            if (err) throw err;
+            console.log(res.affectedRows + " product inserted!\n");
+        })
+    })
   };
 
   function role(){
-    (
-        {
-            type:"input",
-            message:"what is the role",
-            name:"role"
-        }
-    )
+    connection.query("SELECT * FROM department", function(err, res) {
+        if (err) throw err;
+        // Log all results of the SELECT statement
+        console.log(res);
+        const mappedRes = res.map(department => department.name)
+        console.log(mappedRes);
+        inquirer.prompt(
+            [
+                {
+                    type:"input",
+                    message:"what is the role",
+                    name:"role"
+                },
+                {
+                    type:"input",
+                    message:"what is your salary",
+                    name:"salary"
+                },
+                {
+                    type:"list",
+                    message:"what department does the role belong to?",
+                    choices: mappedRes,
+                    name: "department"
+                }
+            ],
+        ).then(response => {
+             const foundObj = res.find(department => {
+                return response.department === department.name
+             })  
+            //  console.log(foundObj);          
+             connection.query ("INSERT INTO role SET ?", 
+            {
+                title: response.role,
+                salary: response.salary,
+                department_id: foundObj.id
+            },
+            function (err,res){
+                if (err) throw err;
+                console.log(res.affectedRows + " product inserted!\n");
+            })
+        })
+      });
   };
 
   function employee(){
@@ -146,7 +186,9 @@ connection.connect(function(err) {
             message:"name",
             name:"name"
         }
-    )
+    ).then(response => {
+
+    })
   };
 
   begin();
