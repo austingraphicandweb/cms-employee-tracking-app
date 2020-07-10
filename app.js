@@ -80,56 +80,52 @@ connection.connect(function(err) {
         }
     ).then(response => {
             if(response.database === "department"){
-                //insert code to allow user to view the department data
+                department();
             } else if (response.database === "role"){
-                //insert code to allow user to view role data
+                roleData();
             } else if (response.database === "employee"){
-                //insert code to allow user to view employee data
+                employeeData();
             }
     })
   };
 
   //is this function going to get its logic from what is inside of the database?
   function employeeRole(){
-    // how to show a list of employees to choose from and update. id, first name, last name, role_id, manager_id
-
-    inquirer.prompt(ƒ
-        [
-            {
-                type:"input",
-                message:"what is your first name",
-                name:"first_name"
-            },
-            {
-                type:"input",
-                message:"what is your last name",
-                name:"last_name"
-            },
-            {
-                type:"list",
-                message:"what is your manager id",
-                choices: mappedRes,
-                name: "managerId"
-            }
-            //i think that role_id is what is auto incrimented inside of mysql
-        ],
-    ).then(response => {
-        // returning the department name from the department table through the usage of res.find
-         const foundObj = res.find(department => {
-            return response.department === department.name
-         })  
-        //  console.log(foundObj);          
-         connection.query ("INSERT INTO role SET ?", 
-        {
-            title: response.role,
-            salary: response.salary,
-            department_id: foundObj.id
-        },
-        function (err,res){
-            if (err) throw err;
-            console.log(res.affectedRows + " product inserted!\n");
-        })
-    })
+    // right here is where the department table is being chosen so that an action can take place
+  connection.query("SELECT * FROM employee", function(err, res) {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      // console.log(res);
+      // this is what is sued to look through the department names in the department table
+      const mappedRes = res.map(employee => employee.last_name)
+      // console.log(mappedRes);
+      inquirer.prompt(
+          [
+              {
+                  type:"list",
+                  message:"which employee do you want to edit?",
+                  name:mappedRes
+              }
+          ],
+      ).then(response => {
+          // returning the department name from the department table through the usage of res.find
+           const foundObj = res.find(department => {
+              return response.department === department.name
+           })  
+          //  console.log(foundObj);          
+           connection.query ("INSERT INTO role SET ?", 
+          {
+              title: response.role,
+              salary: response.salary,
+              department_id: foundObj.id
+          },
+          function (err,res){
+              if (err) throw err;
+              console.log(res.affectedRows + " product inserted!\n");
+          })
+      })
+    });
+};
 
   }
 
@@ -154,25 +150,37 @@ connection.connect(function(err) {
 //   };
 
   function department(){
-    inquirer.prompt
-    (
-        {
-            type:"input",
-            message:"department",
-            name:"department"
-        }
-    ).then(response => {
-        // here is where i am connecting to the department table so that i can inject a value into it 
-        connection.query ("INSERT INTO department SET ?", 
-        {
-            name: response.department
-        },
-        function (err,res){
-            if (err) throw err;
-            console.log(res.affectedRows + " product inserted!\n");
+    connection.query("SELECT * FROM department;", function (err, res){
+        if (err) throw err;
+
+        res.forEach(element => {
+           console.log(element.name); 
         })
-    })
+        
+    });
   };
+
+  function roleData(){
+    connection.query("SELECT * FROM role LEFT JOIN department ON department.id = role.department_id;", function (err, res){
+        if (err) throw err;
+
+        res.forEach(element => {
+           console.log(element.title); 
+        })
+        
+    });
+  }
+
+  function employeeData(){
+    connection.query("select * FROM employee LEFT JOIN role ON employee.role_id=role.id LEFT JOIN department ON department.id = role.department_id;", function (err, res){
+        if (err) throw err;
+
+        res.forEach(element => {
+           console.log(element.first_name); 
+        })
+        
+    });
+  }
 
   function role(){
       // right here is where the department table is being chosen so that an action can take place
@@ -223,15 +231,51 @@ connection.connect(function(err) {
   };
 
   function employee(){
-    (
-        {
-            type:"input",
-            message:"name",
-            name:"name"
-        }
-    ).then(response => {
-
-    })
+    connection.query("SELECT * FROM role", function(err, res) {
+        if (err) throw err;
+        // Log all results of the SELECT statement
+        // console.log(res);
+        // this is what is sued to look through the department names in the department table
+        const mappedRes = res.map(role => role.title)
+        // console.log(mappedRes);
+        inquirer.prompt(
+            [
+                {
+                    type:"input",
+                    message:"what is the first name",
+                    name:"first_name"
+                },
+                {
+                    type:"input",
+                    message:"what is the last name",
+                    name:"last_name"
+                },
+                {
+                    type:"list",
+                    message:"what is your role",
+                    choices: mappedRes,
+                    name: "role"
+                }
+            ],
+        ).then(response => {
+            // returning the department name from the department table through the usage of res.find
+             const foundObj = res.find(role => {
+                return response.role === role.title
+             })  
+            //  console.log(foundObj);          
+             connection.query ("INSERT INTO employee SET ?", 
+            {
+                first_name: response.first_name,
+                last_name: response.last_name,
+                // this is defined in the fole function usually before an employee is added.
+                role_id: foundObj.id
+            },
+            function (err,res){
+                if (err) throw err;
+                console.log(res.affectedRows + " product inserted!\n");
+            })
+        })
+      });
   };
 
   begin();
