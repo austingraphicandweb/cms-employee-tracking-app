@@ -127,8 +127,6 @@ connection.connect(function(err) {
     });
 };
 
-  }
-
 //   function deleteData(){
 //       inquirer.prompt
 //     (
