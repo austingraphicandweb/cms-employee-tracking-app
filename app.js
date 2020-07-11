@@ -1,6 +1,6 @@
 // this is where i am going to be writing my inquirer functions that will prompt the user for questions in the cli and the information will then be stored within the database.
 
-//how can i use inquirer to insert data into mysql?
+// this is where i am calling the required installations so that the program works
 
 const inquirer = require("inquirer");
 const mysql = require("mysql");
@@ -27,6 +27,7 @@ connection.connect(function(err) {
     //insert the function name asking questions here.
   });
 
+  //this is the first thing that the user sees. from here they are directed to the next function which will allow them to either add, view, or change data within the program
   function begin(){
     inquirer.prompt({
         name: "start",
@@ -47,6 +48,7 @@ connection.connect(function(err) {
   });
   };
   
+  // this is what the user sees if they decid to add inforamtion. this function allows the user to choose what they want to add to the database.
   function addInfo(){
     inquirer.prompt
     (
@@ -56,6 +58,7 @@ connection.connect(function(err) {
             choices:["department","role","employee"],
             name:"add"
         }
+        //redirects them to the next function that contains more detailed steps
     ).then(response => {
         if (response.add === "department"){
             department();
@@ -67,6 +70,7 @@ connection.connect(function(err) {
     })
   };
 
+  //this is the next step in viewing the database. here, the user decides what they want to view.
   function viewDatabase(){
     inquirer.prompt 
     (
@@ -78,6 +82,7 @@ connection.connect(function(err) {
             name:"database"
 
         }
+        // this is what directs the user to the information they choose to view
     ).then(response => {
             if(response.database === "department"){
                 department();
@@ -89,16 +94,14 @@ connection.connect(function(err) {
     })
   };
 
-  //is this function going to get its logic from what is inside of the database?
+  //this is where the user goes when they want to choose to edit an employees role.
   function employeeRole(){
     // right here is where the department table is being chosen so that an action can take place
   connection.query("SELECT * FROM employee", function(err, res) {
       if (err) throw err;
-      // Log all results of the SELECT statement
-      // console.log(res);
       // this is what is sued to look through the department names in the department table
       const mappedRes = res.map(employee => employee.last_name)
-      // console.log(mappedRes);
+      // this is where the user determines which employee they want to add information for
       inquirer.prompt(
           [
               {
@@ -107,12 +110,14 @@ connection.connect(function(err) {
                   name:mappedRes
               }
           ],
+          //the return is that it take the information that the user entered in and inserts it back into the database in place of what was there before
       ).then(response => {
           // returning the department name from the department table through the usage of res.find
            const foundObj = res.find(department => {
               return response.department === department.name
            })  
-          //  console.log(foundObj);          
+
+           //this is more specifically what is being targeted by the new information and where the information will be put into the database.
            connection.query ("INSERT INTO role SET ?", 
           {
               title: response.role,
@@ -147,7 +152,9 @@ connection.connect(function(err) {
 //     });
 //   };
 
+// if the user wants to view the department database, this function takes care of that.
   function department(){
+      //this is what is connecting the js to the mysql and picking out certain information
     connection.query("SELECT * FROM department;", function (err, res){
         if (err) throw err;
 
@@ -157,8 +164,9 @@ connection.connect(function(err) {
         
     });
   };
-
+// if the user wants to view the role database, this function takes care of that.
   function roleData(){
+      //this is what is connecting the js to the mysql and picking out certain information
     connection.query("SELECT * FROM role LEFT JOIN department ON department.id = role.department_id;", function (err, res){
         if (err) throw err;
 
@@ -169,7 +177,9 @@ connection.connect(function(err) {
     });
   }
 
+  // if the user wants to view all of the employee data put together by joining tables, this function takes care of that.
   function employeeData(){
+      //this is what is connecting the js to the mysql and picking out certain information
     connection.query("select * FROM employee LEFT JOIN role ON employee.role_id=role.id LEFT JOIN department ON department.id = role.department_id;", function (err, res){
         if (err) throw err;
 
@@ -180,15 +190,14 @@ connection.connect(function(err) {
     });
   }
 
+  //this is the function that is used for inputting a new user into the database. 
   function role(){
       // right here is where the department table is being chosen so that an action can take place
     connection.query("SELECT * FROM department", function(err, res) {
         if (err) throw err;
-        // Log all results of the SELECT statement
-        // console.log(res);
-        // this is what is sued to look through the department names in the department table
+        // this is what is used to look through the department names in the department table
         const mappedRes = res.map(department => department.name)
-        // console.log(mappedRes);
+        //these are the questions prompted for the user
         inquirer.prompt(
             [
                 {
@@ -208,12 +217,14 @@ connection.connect(function(err) {
                     name: "department"
                 }
             ],
+            //this the is promise that occurs after the user has put in their selctions.
         ).then(response => {
             // returning the department name from the department table through the usage of res.find
+            // shows the specific department names
              const foundObj = res.find(department => {
                 return response.department === department.name
              })  
-            //  console.log(foundObj);          
+             //this is a connection to the sql database from the script        
              connection.query ("INSERT INTO role SET ?", 
             {
                 title: response.role,
@@ -228,14 +239,14 @@ connection.connect(function(err) {
       });
   };
 
+
   function employee(){
+      // this is a connection that is selecting all of the data within the role table in sql
     connection.query("SELECT * FROM role", function(err, res) {
         if (err) throw err;
-        // Log all results of the SELECT statement
-        // console.log(res);
         // this is what is sued to look through the department names in the department table
         const mappedRes = res.map(role => role.title)
-        // console.log(mappedRes);
+        //these are the questions being asked to the user to determine what information will be stored for an employee within the database
         inquirer.prompt(
             [
                 {
@@ -254,7 +265,7 @@ connection.connect(function(err) {
                     choices: mappedRes,
                     name: "role"
                 }
-            ],
+            ],//this promise is what happens when the questions are answered by the user. the roles are displayed for the user to see, and then the information is put into the database depending on which role is chosen
         ).then(response => {
             // returning the department name from the department table through the usage of res.find
              const foundObj = res.find(role => {
@@ -276,4 +287,6 @@ connection.connect(function(err) {
       });
   };
 
+
+  //this calls the first function that will run when the program is started
   begin();
