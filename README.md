@@ -13,7 +13,7 @@ link: https://github.com/austingraphicandweb/cms-employee-tracking-app
 
 ## Screenshot
 
-![screenshot](./screenshot.png)
+![screenshot](/screenshot.png)
 
 
 <hr>
