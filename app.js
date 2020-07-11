@@ -33,18 +33,18 @@ connection.connect(function(err) {
         name: "start",
         type: "list",
         message: "What do you want to do?",
-        choices: ["add information", "view database content","update employee roles", "delete data"]
+        choices: ["add information", "view database content","update employee roles"]
         }).then (response => {
-            console.log(response);
         if(response.start === "add information"){
           addInfo();
         } else if (response.start === "view database content") {
           viewDatabase();
         } else if (response.start === "update employee roles"){
             employeeRole();
-        } else if (response.start === "delete data"){
-            deleteData();
-        }
+        }  
+        // else if (response.start === "delete data"){
+        //     deleteData();
+        // }
   });
   };
   
@@ -61,7 +61,7 @@ connection.connect(function(err) {
         //redirects them to the next function that contains more detailed steps
     ).then(response => {
         if (response.add === "department"){
-            department();
+            departmentAdd();
         } else if (response.add === "role"){
             role();
         } else if (response.add === "employee"){
@@ -85,7 +85,7 @@ connection.connect(function(err) {
         // this is what directs the user to the information they choose to view
     ).then(response => {
             if(response.database === "department"){
-                department();
+                departmentView();
             } else if (response.database === "role"){
                 roleData();
             } else if (response.database === "employee"){
@@ -107,7 +107,8 @@ connection.connect(function(err) {
               {
                   type:"list",
                   message:"which employee do you want to edit?",
-                  name:mappedRes
+                  choices:[mappedRes],
+                  name:"name"
               }
           ],
           //the return is that it take the information that the user entered in and inserts it back into the database in place of what was there before
@@ -153,7 +154,7 @@ connection.connect(function(err) {
 //   };
 
 // if the user wants to view the department database, this function takes care of that.
-  function department(){
+  function departmentView(){
       //this is what is connecting the js to the mysql and picking out certain information
     connection.query("SELECT * FROM department;", function (err, res){
         if (err) throw err;
@@ -188,6 +189,40 @@ connection.connect(function(err) {
         })
         
     });
+  }
+
+  function departmentAdd(){
+             // right here is where the department table is being chosen so that an action can take place
+    connection.query("SELECT * FROM department", function(err, res) {
+        if (err) throw err;
+        // this is what is used to look through the department names in the department table
+        //these are the questions prompted for the user
+        inquirer.prompt(
+            [
+                {
+                    type:"input",
+                    message:"what is the name of the department?",
+                    name:"department"
+                },
+            ],
+            //this the is promise that occurs after the user has put in their selctions.
+        ).then(response => {
+            // returning the department name from the department table through the usage of res.find
+            // shows the specific department names
+             const foundObj = res.find(department => {
+                return response.department === department.name
+             })  
+             //this is a connection to the sql database from the script        
+             connection.query ("INSERT INTO department SET ?", 
+            {
+                name:response.name
+            },
+            function (err,res){
+                if (err) throw err;
+                console.log(res.affectedRows + " product inserted!\n");
+            })
+        })
+      });
   }
 
   //this is the function that is used for inputting a new user into the database. 
@@ -262,7 +297,7 @@ connection.connect(function(err) {
                 {
                     type:"list",
                     message:"what is your role",
-                    choices: mappedRes,
+                    choices: [mappedRes],
                     name: "role"
                 }
             ],//this promise is what happens when the questions are answered by the user. the roles are displayed for the user to see, and then the information is put into the database depending on which role is chosen
